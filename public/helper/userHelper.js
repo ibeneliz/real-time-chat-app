@@ -36,9 +36,15 @@ function getIndividualRoomUsers(room) {
     }
 }
 
+// Validate current user
+function isUserExist(username) {
+    return users.find(user => user.username === username);
+}
+
 module.exports = {
     newUser,
     getActiveUser,
     exitRoom,
-    getIndividualRoomUsers
+    getIndividualRoomUsers,
+    isUserExist
 };
