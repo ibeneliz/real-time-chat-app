@@ -41,10 +41,17 @@ function isUserExist(username) {
     return users.find(user => user.username === username);
 }
 
+// Get socket id of user
+function getSocketIdOfUser(username) {
+    let userData = users.find(user => user.username === username);
+    return userData.id;
+}
+
 module.exports = {
     newUser,
     getActiveUser,
     exitRoom,
     getIndividualRoomUsers,
-    isUserExist
+    isUserExist,
+    getSocketIdOfUser
 };

@@ -8,7 +8,8 @@ const {
     exitRoom,
     newUser,
     getIndividualRoomUsers,
-    isUserExist
+    isUserExist,
+    getSocketIdOfUser
 } = require('./public/helper/userHelper');
 
 const app = express();
@@ -46,13 +47,20 @@ io.on('connection', socket => {
                 room: user.room,
                 users: getIndividualRoomUsers(user.room)
             });
-        });
+                    });
 
         // Listen for client message
         socket.on('chatMessage', msg => {
             const user = getActiveUser(socket.id);
 
             io.to(user.room).emit('message', formatMessage(user.username, msg));
+        });
+
+        socket.on('privateChatMessage', params => {
+            console.log("Entered socket privateChatMessage");
+            const user = getActiveUser(socket.id);
+            io.to(getSocketIdOfUser(params.privateChatReceiver)).emit('message', formatMessage(user.username, params.msg));
+            io.to(socket.id).emit('message', formatMessage(user.username, params.msg));
         });
 
         // Runs when client disconnects

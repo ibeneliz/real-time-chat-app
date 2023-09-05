@@ -2,6 +2,8 @@ const chatForm = document.getElementById('chat-form');
 const chatMessages = document.querySelector('.chat-messages');
 const roomName = document.getElementById('room-name');
 const userList = document.getElementById('users');
+const msg = document.getElementById('msg');
+let privateChatReceiver= "";
 
 const { username, room } = Qs.parse(location.search, {
   ignoreQueryPrefix: true,
@@ -13,7 +15,7 @@ const socket = io();
 socket.emit('joinRoom', { username, room });
 
 socket.on('roomUsers', ({ room, users }) => {
-  outputRoomName(room);
+    outputRoomName(room);
   outputUsers(users);
 });
 
@@ -38,7 +40,15 @@ chatForm.addEventListener('submit', (e) => {
     }
 
     // Emit message to server
-    socket.emit('chatMessage', msg);
+    if(privateChatReceiver != ""){
+      socket.emit('privateChatMessage', {
+        privateChatReceiver: privateChatReceiver,
+        msg: msg
+      }   
+      );
+    }else{
+      socket.emit('chatMessage', msg);
+    }
 
     // Clear input
     e.target.elements.msg.value = '';
@@ -79,6 +89,8 @@ function outputUsers(users) {
   users.forEach((user) => {
     const li = document.createElement('li');
     li.innerText = user.username;
+    li.className = "chat-user";
+    li.setAttribute("onclick", 'selectedChatUser(this)');
     userList.appendChild(li);
   });
 }
@@ -90,3 +102,9 @@ document.getElementById('leave-btn').addEventListener('click', () => {
     window.location = '../index.html';
   }
 });
+
+function selectedChatUser(htmlElement) {
+  privateChatReceiver = htmlElement.innerText;
+  htmlElement.style.backgroundColor = "red";
+  msg.placeholder = "Enter your private message to: " + htmlElement.innerText;
+}
